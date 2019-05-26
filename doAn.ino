@@ -22,7 +22,9 @@ const int pumpAnodePin =  6;
 const int pumpCathodePin =7;
 const int lamp=5;
 
-Servo horizontalServo;  
+Servo horizontalServo; 
+Servo rainservo;  
+int servoRainPin = 10;   
 
 const int DHTPIN = 3;     
 const int DHTTYPE = DHT11;  
@@ -36,7 +38,7 @@ int moistureValue0 = 0;
 int moistureValue1 = 0;
 int moistureValue2 = 0;
 
-int rainSensor = 11; // Chân tín hiệu cảm biến mưa ở chân digital 6 (arduino)
+int rainSensor = A5; // Chân tín hiệu cảm biến mưa ở chân digital 6 (arduino)
 int lightSensor = A4;// khai báo chân digital 10 cho cảm biến anh sang
 
 
@@ -47,7 +49,8 @@ long int moistureSum2 = 0;
 
 #define COLD_TEMP     15
 #define HOT_TEMP      24
-#define LIGHT 20
+#define LIGHT         20
+#define RAIN          20
 
 //boolean lampStatus = 0;
 float humDHT;
@@ -60,7 +63,9 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Do An !");
   dht.begin(); 
-  horizontalServo.attach(9);  
+  horizontalServo.attach(9); 
+  rainservo.attach(servoRainPin);
+  
   initPosition();
   delay(500);
   pinMode(pumpAnodePin, OUTPUT);
@@ -70,6 +75,7 @@ void setup() {
 
 void loop() {
   turnOnorOffLightbySensor();
+  maiche();
   for(int i = 0; i < 30; i++)//samping 30 time within 3 seconds
   {
     moistureSum0 = moistureSum0 + analogRead(analogInPin0);  
@@ -105,6 +111,9 @@ void loop() {
   Serial.print("\n");
   Serial.print("cam bien anh sang " );                       
   Serial.print(map(analogRead(lightSensor), 1023, 0, 0, 100));
+   Serial.print("\n");
+   Serial.print("cam bien mua " );                       
+  Serial.print(map(analogRead(rainSensor), 1023, 0, 0, 100));
    Serial.print("\n");
   moistureSum0 = 0;//reset the variable
   moistureSum1 = 0;
@@ -148,7 +157,19 @@ void turnOnorOffLightbySensor(){
     digitalWrite(lamp, LOW);
     } 
 }
-
+//mái che
+void maiche(){
+  int valueRain = analogRead(rainSensor);
+  int valueRainS=map(valueRain, 1023, 0, 0, 100);
+  if (valueRainS < RAIN){
+    //góc khi mà ko có mưa
+     rainservo.write(0);
+     //delay(2000);
+  } else {
+     rainservo.write(180);
+     //delay(2000);
+  } 
+}
 void suoiam (void) {
   if (tempDHT < HOT_TEMP) {
     digitalWrite(lamp, HIGH);
