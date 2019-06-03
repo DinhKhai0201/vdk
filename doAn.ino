@@ -5,16 +5,16 @@
 #define triger 250
 //Define the parameters of the flower1
 #define servoPosition0 10  
-#define triggerValue0 50  
+#define triggerValue0 60  
 #define wateringTime0 35  
 
 //Define the parameters of the flower2
-#define servoPosition1 70  
-#define triggerValue1 60 
+#define servoPosition1 50  
+#define triggerValue1 50 
 #define wateringTime1 20  
 
 //Define the parameters of the flower3
-#define servoPosition2 130 
+#define servoPosition2 120 
 #define triggerValue2 50 
 #define wateringTime2 15  
 
@@ -50,12 +50,12 @@ long int moistureSum2 = 0;
 #define COLD_TEMP     15
 #define HOT_TEMP      24
 #define LIGHT         20
-#define RAIN          20
+#define RAIN          70
 
 //boolean lampStatus = 0;
 float humDHT;
 float tempDHT;
-
+boolean posi=true; 
 DHT dht(DHTPIN, DHTTYPE);
 void setup() {
   pinMode(rainSensor,INPUT);// Đặt chân cảm biến mưa là INPUT, vì tín hiệu sẽ được truyền đến cho Arduino
@@ -109,12 +109,14 @@ void loop() {
   Serial.print(tempDHT);
   Serial.print(" *C\t");
   Serial.print("\n");
-  Serial.print("cam bien anh sang " );                       
+  Serial.print("cam bien anh sang " );                      
   Serial.print(map(analogRead(lightSensor), 1023, 0, 0, 100));
-   Serial.print("\n");
-   Serial.print("cam bien mua " );                       
+  Serial.print(" %"); 
+  Serial.print("\n");
+  Serial.print("cam bien mua " );                 
   Serial.print(map(analogRead(rainSensor), 1023, 0, 0, 100));
-   Serial.print("\n");
+  Serial.print(" %");  
+  Serial.print("\n");
   moistureSum0 = 0;//reset the variable
   moistureSum1 = 0;
   moistureSum2 = 0;
@@ -150,7 +152,7 @@ void runDHT(void) {
 void turnOnorOffLightbySensor(){
   int value = analogRead(lightSensor);
   int valueS=map(value, 1023, 0, 0, 100);
-  if (valueS < 20){
+  if (valueS < 40){
     digitalWrite(lamp, HIGH);
   }
   else {
@@ -159,19 +161,29 @@ void turnOnorOffLightbySensor(){
 }
 //mái che
 void maiche(){
-  int valueRain = analogRead(rainSensor);
+    int valueRain = analogRead(rainSensor);
   int valueRainS=map(valueRain, 1023, 0, 0, 100);
-  if (valueRainS < RAIN){
-    //góc khi mà ko có mưa
-     rainservo.write(0);
-     //delay(2000);
-  } else {
-     rainservo.write(180);
-     //delay(2000);
-  } 
+  if (valueRainS > RAIN){
+    if (posi==true) {
+    for (int i=0;i<=180;i++){
+        rainservo.write(i);
+        delay(50);       
+    } 
+    posi =false;
+  }
+ }
+ if (valueRainS < RAIN){
+    if (posi==false) {
+    for (int i=180;i>=0;i--){
+        rainservo.write(i);
+        delay(50);       
+    } 
+    posi =true;
+  }
+ }
 }
 void suoiam (void) {
-  if (tempDHT < HOT_TEMP) {
+  if (tempDHT < COLD_TEMP) {
     digitalWrite(lamp, HIGH);
     }   
   }
