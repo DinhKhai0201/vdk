@@ -1,20 +1,48 @@
-//#include <SoftwareSerial.h>
+//Hệ thống nông nghiệp thông mình
+//---------------------------------------------
+//Cách nối arduino với cảm  biến đất
+//Cảm biến độ ẩm đất | Arduino UNO          
+//           Vcc     |     5V
+//           GND     |     GND
+//           D0      |     2
+//           A0      |     A0
+//           A1      |     A1
+//           A2      |     A2
+//---------------------------------------------
+//Cách nối arduino với cảm  độ ẩm không khí dht11
+//Cảm biến dht11     | Arduino UNO          
+//           Vcc     |     5V
+//           GND     |     GND
+//           D0      |     3
+//---------------------------------------------
+//Cách nối arduino với cảm  biến ánh sáng
+//Cảm biến dht11     | Arduino UNO          
+//           Vcc     |     5V
+//           GND     |     GND
+//           D0      |     A4
+//---------------------------------------------
+//Cách nối arduino với cảm  biến mưa
+//Cảm biến mưa       | Arduino UNO          
+//           Vcc     |     5V
+//           GND     |     GND
+//           D0      |     A5
+//---------------------------------------------
 #include "DHT.h"
 #include <Servo.h> 
 
 #define triger 250
-//Define the parameters of the flower1
+//Chậu 1
 #define servoPosition0 10  
-#define triggerValue0 60  
+#define triggerValue0 50  
 #define wateringTime0 35  
 
-//Define the parameters of the flower2
+//Chậu 2
 #define servoPosition1 50  
 #define triggerValue1 50 
 #define wateringTime1 20  
 
-//Define the parameters of the flower3
-#define servoPosition2 120 
+//Chậu 3
+#define servoPosition2 100 
 #define triggerValue2 50 
 #define wateringTime2 15  
 
@@ -33,7 +61,7 @@ const int analogInPin0 = A0;  //
 const int analogInPin1 = A1;
 const int analogInPin2 = A2;
 
-//the value readed from each moisture sensor
+//Các biến cảm biến đất
 int moistureValue0 = 0;        
 int moistureValue1 = 0;
 int moistureValue2 = 0;
@@ -52,20 +80,19 @@ long int moistureSum2 = 0;
 #define LIGHT         20
 #define RAIN          70
 
-//boolean lampStatus = 0;
 float humDHT;
 float tempDHT;
 boolean posi=true; 
 DHT dht(DHTPIN, DHTTYPE);
+
 void setup() {
-  pinMode(rainSensor,INPUT);// Đặt chân cảm biến mưa là INPUT, vì tín hiệu sẽ được truyền đến cho Arduino
+  pinMode(rainSensor,INPUT);
   pinMode(lightSensor,INPUT);
   Serial.begin(115200);
   Serial.println("Do An !");
   dht.begin(); 
   horizontalServo.attach(9); 
   rainservo.attach(servoRainPin);
-  
   initPosition();
   delay(500);
   pinMode(pumpAnodePin, OUTPUT);
@@ -90,8 +117,6 @@ void loop() {
   int m1=map(moistureValue1, 1023, 0, 0, 100);
   int m2=map(moistureValue2, 1023, 0, 0, 100);
   getDhtData();
-  //turnOnorOffLightbySensor();
-  // print the results to the serial monitor:
   Serial.print("Moisture0 = " );                       
   Serial.print(m0);
   Serial.print(" %\t");      
@@ -117,7 +142,7 @@ void loop() {
   Serial.print(map(analogRead(rainSensor), 1023, 0, 0, 100));
   Serial.print(" %");  
   Serial.print("\n");
-  moistureSum0 = 0;//reset the variable
+  moistureSum0 = 0;
   moistureSum1 = 0;
   moistureSum2 = 0;
   suoiam();
@@ -191,7 +216,7 @@ void suoiam (void) {
 void getDhtData(void){
   tempDHT = dht.readTemperature();
   humDHT = dht.readHumidity();
-  if (isnan(humDHT) || isnan(tempDHT))   // Kiểm tra kết nối lỗi thì thông báo.
+  if (isnan(humDHT) || isnan(tempDHT))   
   {
     Serial.println("\tLỗi kết nối đến sensor");
     return;
